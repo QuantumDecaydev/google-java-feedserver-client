@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Copyright 2007 Google Inc. All rights reserved. 
+  
+Build File for java feedserver client.
+
+  Interesting targets:
+   -clean: 
+   -compile: generates classes
+   -jar: creates the jar file 
+   -source-distro: creates the source.tar.gz for the whole project
+-->
+
+<project 
+    name="feedserver-client" 
+    default="source-distro"
+    basedir=".">
+
+  <!-- PROPERTIES -->
+  <property name="version" value="1.0"/>
+
+  <property name="COMPILE_DEBUG_FLAG" value="true" />
+  <property name="COMPILE_DEBUG_LEVEL" value="source,lines,vars" />
+
+  <property name="build" value="build" />
+  <property name="prod" value="${build}/prod" />
+  <property name="dist" value="dist" />
+  <property name="src" value="src/java" />
+  <property name="classes" value="${prod}/classes" />
+  <property name="webdocs" value="src/webdocs" />
+  <property name="jar.dir" value="${build}/bin" />
+
+  <property 
+      name="client.jarfile" 
+      value="${jar.dir}/google-java-feedserver-client.jar" />
+
+  <!-- TARGETS -->
+
+  <target name="init">    
+    <tstamp>
+      <format property="timestamp" pattern="MMddyyyyhhmm"/>
+    </tstamp>
+    <mkdir dir="${build}" />
+    <mkdir dir="${prod}" />
+    <mkdir dir="${dist}" />
+    <mkdir dir="${classes}" />
+    <mkdir dir="${jar.dir}" />  
+  </target>
+
+  <target name="clean" description="Deletes all build files.">
+    <delete dir="${build}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <javac 
+        srcdir="${src}" 
+        destdir="${classes}"
+        debug="${COMPILE_DEBUG_FLAG}"
+        debuglevel="${COMPILE_DEBUG_LEVEL}"
+        includes="**"
+        >
+      <classpath>
+        <pathelement path="third-party/commons-beanutils/commons-beanutils-1.8.0.jar"/>
+        <pathelement path="third-party/commons-cli/commons-cli-1.1.jar"/>
+        <pathelement path="third-party/commons-lang/commons-lang-2.4.jar"/>
+        <pathelement path="third-party/commons-logging/commons-logging-1.1.jar"/>
+        <pathelement path="third-party/apache-log4j/log4j-1.2.15.jar"/>
+        <pathelement path="third-party/gdata/java/lib/gdata-client-1.0.jar"/>
+        <pathelement path="third-party/gdata/java/lib/gdata-base-1.0.jar"/>
+        <pathelement path="third-party/gdata/java/lib/gdata-core-1.0.jar"/>
+        <pathelement path="third-party/guice/guice-1.0.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" depends="client_jar"/>
+
+  <target name="client_jar" depends="compile">
+    <tstamp/>
+    <jar jarfile="${client.jarfile}">
+      <fileset dir="${classes}" includes="**"/>
+      <manifest>
+        <attribute name="Implementation-Title" value="Google Feedserver Client"/>
+        <attribute name="Implementation-Version" value="${version} ${TODAY}"/>
+        <attribute name="Implementation-Vendor" value="Google"/>
+        <attribute name="Main-Class"
+              value="com.google.feedserver.tools.FeedTool"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="source-distro" depends="clean,init">
+    <tar 
+        destfile="${dist}/google-java-feedserver-client-${version}-${timestamp}-src.tar.gz"
+        longfile="gnu"
+        compression="gzip"
+        excludes="tmp/**, third-party/*/docs/**">
+      <tarfileset dir=".">
+        <include name="build.xml"/>
+        <include name="src/**"/>
+        <include name="third-party/commons-*/**"/>
+        <include name="third-party/guice-*/**"/>
+        <include name="third-party/gdata-*/**"/>
+      </tarfileset>
+      <tarfileset dir="." mode="755">
+        <include name="runfeedtool.sh"/>
+      </tarfileset>
+    </tar>
+  </target>
+</project>
+
