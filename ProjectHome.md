@@ -1,0 +1,1 @@
+Allows easy access to feeds.
